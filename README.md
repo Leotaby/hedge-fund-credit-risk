@@ -104,4 +104,4 @@ Outputs will appear in the `results/` directory.
 
 ## License
 
-This project is provided for educational purposes.  Data sources used herein originate from the public domain or freely available academic repositories; users should check the terms of use before applying them in a production setting.
+This project is provided for educational purposes.  Data sources used herein originate from the public domain.
