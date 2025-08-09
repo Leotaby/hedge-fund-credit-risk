@@ -1,6 +1,6 @@
 # Hedge Fund Credit Risk Analysis Project
 
-This repository contains a demonstration project designed to showcase skills relevant to the **Wholesale Credit Risk – EMEA Hedge Funds and Asset Managers** role at J.P. Morgan.  The goal is to emulate the workflow of an analyst who must assess a hedge fund’s counter‑party credit risk, quantify exposures to market factors and communicate results clearly to stakeholders.
+This repository is a demonstration of hedge-fund counterparty credit risk analysis. It emulates the workflow of an analyst covering hedge funds and asset managers: ingesting public data, estimating factor exposures (Fama–French), computing exposure/credit metrics (including VaR/ES), running scenario and stress tests, and producing clear, stakeholder-ready outputs. Tech stack: Python, SQLite, pandas, NumPy, statsmodels, matplotlib. Data are public/synthetic for illustration only.
 
 ## Project Overview
 
