@@ -75,7 +75,7 @@ The responsibilities of a **Wholesale Credit Risk – EMEA Hedge Funds and Asset
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/<your‑username>/credit_risk_project.git
+git clone https://github.com/Leotaby/credit_risk_project.git
 cd credit_risk_project
 ```
 
