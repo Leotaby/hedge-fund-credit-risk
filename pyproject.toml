@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hfcr"
+version = "0.0.1"
+description = "Research utilities"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "pandas>=2.0",
+  "numpy>=1.25",
+  "matplotlib>=3.8",
+  "statsmodels>=0.14",
+  "linearmodels>=5.4",
+  "pytest>=8.0"
+]
