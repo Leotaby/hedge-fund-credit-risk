@@ -1,107 +1,423 @@
-# Hedge Fund Credit Risk Analysis Project
+# 📊 Hedge Fund Credit Risk Analysis Framework
 
-This repository is a demonstration of hedge-fund counterparty credit risk analysis. It emulates the workflow of an analyst covering hedge funds and asset managers: ingesting public data, estimating factor exposures (Fama–French), computing exposure/credit metrics (including VaR/ES), running scenario and stress tests, and producing clear, stakeholder-ready outputs. Tech stack: Python, SQLite, pandas, NumPy, statsmodels, matplotlib. Data are public/synthetic for illustration only.
+[![Python](https://img.shields.io/badge/Python-3.9+-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![pandas](https://img.shields.io/badge/pandas-1.5+-150458.svg?logo=pandas)](https://pandas.pydata.org/)
+[![NumPy](https://img.shields.io/badge/NumPy-1.24+-013243.svg?logo=numpy)](https://numpy.org/)
 
-## Project Overview
+> **Quantitative risk modeling toolkit for hedge funds and asset managers**  
+> VaR calculations, scenario analysis, counterparty exposure, and regulatory reporting
 
-The project consists of two main stages:
+---
 
-1. **Data Ingestion and Storage.**  Using Python and SQLite, we ingest publicly available financial datasets and populate a relational database.  The database schema includes tables for Fama–French factor returns, daily equity price histories, hedge funds and their positions.  The data used come from widely cited academic and market sources.  For example, the Fama–French five‑factor data file contains daily returns for the market excess return and factors `SMB`, `HML`, `RMW` and `CMA` along with the risk‑free rate【773800767166952†L0-L44】.  Equity price files provide open, high, low, close, adjusted close and volume for each trading day.  All files reside under the `data/` directory and are loaded via the `scripts/create_database.py` program.
+## 📋 Table of Contents
 
-2. **Risk Analysis.**  The core analysis lives in `scripts/analyze_risk.py`.  This script reads data from the SQLite database, computes daily log returns for each asset and constructs portfolio returns for several example hedge funds based on their holdings.  It then aligns those returns with factor returns by harmonising date formats and estimates the funds’ exposures (betas) to the Fama–French factors through ordinary least squares regression.  The script also calculates historical 95 % **Value at Risk (VaR)** and **Expected Shortfall (ES)** for each fund, two key metrics used by credit risk managers to assess potential losses under adverse market conditions.  Finally, it produces visualisations of cumulative returns, return distributions annotated with VaR thresholds, and bar charts of factor exposures.  Results are written to the `results/` directory in both CSV and PNG formats.
+- [Overview](#-overview)
+- [Features](#-features)
+- [Installation](#-installation)
+- [Quick Start](#-quick-start)
+- [Modules](#-modules)
+- [Examples](#-examples)
+- [Methodology](#-methodology)
+- [Project Structure](#-project-structure)
+- [Contributing](#-contributing)
 
-## Files and Structure
+---
 
-```
-credit_risk_project/
-│
-├─ data/                    # Source CSV files for factors and asset prices
-├─ scripts/                 # Python scripts to create the database and run analysis
-│   ├─ create_database.py   # Populates SQLite database with factors, prices and fund positions
-│   └─ analyze_risk.py      # Performs risk analysis, produces summary statistics and plots
-├─ results/                 # Generated outputs: portfolio returns, summary metrics and charts
-└─ risk_management.db       # SQLite database created by create_database.py
-```
+## 🎯 Overview
 
-## Methodology
+A comprehensive **credit risk analysis framework** designed for:
 
-### Database Construction
+- **Hedge Funds** - Portfolio-level credit exposure and VaR
+- **Asset Managers** - Counterparty risk assessment
+- **Risk Teams** - Regulatory stress testing (Basel III/IV alignment)
+- **Researchers** - Quantitative risk modeling experimentation
 
-Running `python scripts/create_database.py` builds a fresh SQLite database (`risk_management.db`).  It defines four tables:
+### Why This Project?
 
-* **factor_returns** – stores the Fama–French five factor data with columns `date`, `mkt_rf`, `smb`, `hml`, `rmw`, `cma` and `rf`.
-* **asset_prices** – daily price history for each asset with columns `date`, `asset`, `open`, `high`, `low`, `close`, `adj_close` and `volume`.  Data for the S&P 500 index (SPX), Apple (AAPL) and Amazon (AMZN) are included.  A sample from the SPX file shows the typical structure: date, open, high, low, close, adjusted close and volume【773800767166952†L0-L44】.
-* **funds** – a simple reference table listing three hypothetical hedge funds.
-* **positions** – the quantity of each asset held by each fund.  These positions are illustrative; in practice they would be obtained from internal books and records.
+Traditional risk systems are often black boxes. This framework provides:
 
-### Risk Analysis and Modelling
+1. **Transparency** - Full visibility into risk calculations
+2. **Flexibility** - Modular design for custom risk metrics
+3. **Reproducibility** - Version-controlled, tested codebase
+4. **Education** - Well-documented methodology
 
-The analysis script demonstrates several techniques that are central to credit risk management:
+---
 
-1. **Return Computation:** Adjusted close prices are converted to daily log returns.  Log returns are additive over time and common in risk modelling.
+## ✨ Features
 
-2. **Portfolio Aggregation:** Asset returns are combined into fund‑level returns based on position weights.  The script normalises by total exposure to obtain a weighted average return for each day.
+| Module | Description |
+|--------|-------------|
+| **VaR Engine** | Historical, Parametric, and Monte Carlo VaR |
+| **Scenario Analysis** | Stress testing with custom shock scenarios |
+| **Counterparty Risk** | PFE, CVA, and exposure-at-default calculations |
+| **Portfolio Analytics** | Concentration risk, sector exposure, correlation |
+| **Reporting** | Automated risk reports with visualizations |
 
-3. **Factor Exposure Estimation:** After aligning portfolio returns with factor returns by date, the script subtracts the risk‑free rate to obtain excess returns.  It then regresses excess returns on the five Fama–French factors to estimate betas (sensitivity to each factor) and alpha (unexplained return).  These coefficients help assess how market movements impact each fund’s performance.
+---
 
-4. **Risk Metrics:** The 95 % Value at Risk (VaR) and Expected Shortfall (ES) are computed using the empirical distribution of portfolio returns.  VaR represents the threshold loss not exceeded 95 % of the time, while ES measures the average loss in the worst 5 % of cases.  These metrics provide insight into tail risk and are widely used in counterparty credit analysis and regulatory capital calculations.
+## 🛠 Installation
 
-5. **Visual Communication:** Cumulative return charts summarise performance over time, return distribution histograms highlight skewness and fat tails, and factor exposure bar plots illustrate which systematic risks each fund carries.  Clear visualisations are essential when presenting risk assessments to senior management and regulators.
+### Prerequisites
 
-## Results Summary
+- Python 3.9+
+- pip or conda
 
-The table below summarises key metrics for the example funds.  Betas greater than zero indicate positive exposure to the corresponding factor, while negative values indicate that the fund benefits when the factor underperforms.  Alpha reflects average excess return unexplained by the five factors.
-
-| Fund | Alpha | Mkt‑RF β | SMB β | HML β | RMW β | CMA β | 95 % VaR | 95 % ES |
-|-----:|------:|--------:|------:|------:|------:|------:|--------:|--------:|
-| Equity Hedge Fund | 0.00046 | 0.99 | –0.21 | –0.28 | –0.02 | –0.58 | 0.0255 | 0.0340 |
-| Long/Short Fund | 0.00040 | 1.02 | –0.23 | –0.34 | –0.06 | –0.59 | 0.0261 | 0.0348 |
-| Tech Focused Fund | 0.00065 | 0.95 | –0.20 | –0.27 | 0.03 | –0.70 | 0.0267 | 0.0390 |
-
-All three funds have market beta close to one, implying that their returns move broadly in line with the overall market.  Negative loadings on the value (`HML`) and profitability (`RMW`) factors suggest a growth‑oriented bias, which is typical for technology and long/short strategies.  The Tech Focused Fund exhibits the highest expected shortfall, reflecting greater tail risk compared with the other funds.  Such insights would inform credit approvals, limit setting and ongoing monitoring.
-
-## How This Aligns With the Role
-
-The responsibilities of a **Wholesale Credit Risk – EMEA Hedge Funds and Asset Managers** analyst include assessing counterparty exposure, analysing market events, building financial models, preparing presentations and collaborating with colleagues.  This project touches on each of these facets:
-
-* **Data Sourcing and Management:** The scripts ingest free, reputable datasets into a structured database, mirroring how risk analysts gather and organise market and client data.
-* **Quantitative Modelling:** By computing returns, estimating factor exposures and calculating VaR/ES, the project demonstrates the ability to build quantitative models that translate market information into risk metrics.
-* **Scenario Analysis:** Although the sample analysis uses historical distributions, the modular functions could be extended to perform stress testing under hypothetical shocks or incorporate additional factors (e.g., liquidity, leverage) as would be expected in a real credit review.
-* **Communication:** The generated charts and summary reports can be used in presentations to explain complex risk concepts to non‑experts, aligning with the requirement to prepare presentations and outline recommendations to senior management.
-* **Collaboration:** The repository is organised for ease of understanding and extensibility, making it straightforward for teammates to reproduce and build upon the analysis.
-
-## Getting Started
-
-1. Clone the repository:
+### Install
 
 ```bash
-git clone https://github.com/Leotaby/credit_risk_project.git
-cd credit_risk_project
+# Clone the repository
+git clone https://github.com/Leotaby/hedge-fund-credit-risk.git
+cd hedge-fund-credit-risk
+
+# Create virtual environment (recommended)
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# or
+.\venv\Scripts\activate  # Windows
+
+# Install dependencies
+pip install -r requirements.txt
 ```
 
-2. Create a Python virtual environment (optional but recommended) and install dependencies:
+### Dependencies
+
+```
+pandas>=1.5.0
+numpy>=1.24.0
+scipy>=1.10.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+yfinance>=0.2.0
+pytest>=7.0.0
+```
+
+---
+
+## 🚀 Quick Start
+
+```python
+from risk_engine import PortfolioRisk, VaRCalculator
+from data_loader import load_portfolio
+
+# Load sample portfolio
+portfolio = load_portfolio("data/sample_portfolio.csv")
+
+# Initialize risk calculator
+risk = PortfolioRisk(portfolio)
+
+# Calculate VaR at 95% confidence, 10-day horizon
+var_95 = risk.calculate_var(confidence=0.95, horizon=10, method="historical")
+print(f"10-day 95% VaR: ${var_95:,.2f}")
+
+# Run stress test
+stress_results = risk.stress_test(scenario="2008_financial_crisis")
+print(f"Stress Loss: ${stress_results['total_loss']:,.2f}")
+
+# Generate risk report
+risk.generate_report(output_path="reports/risk_report.html")
+```
+
+---
+
+## 📦 Modules
+
+### 1. VaR Calculator (`risk_engine/var.py`)
+
+Three methodologies for Value-at-Risk:
+
+```python
+from risk_engine.var import VaRCalculator
+
+calc = VaRCalculator(returns_data)
+
+# Historical VaR - uses actual return distribution
+historical_var = calc.historical_var(confidence=0.99)
+
+# Parametric VaR - assumes normal distribution
+parametric_var = calc.parametric_var(confidence=0.99)
+
+# Monte Carlo VaR - simulates price paths
+monte_carlo_var = calc.monte_carlo_var(
+    confidence=0.99,
+    simulations=10000,
+    horizon=10
+)
+```
+
+### 2. Scenario Analysis (`risk_engine/scenarios.py`)
+
+Pre-built and custom stress scenarios:
+
+```python
+from risk_engine.scenarios import ScenarioEngine
+
+engine = ScenarioEngine(portfolio)
+
+# Pre-built scenarios
+results = engine.run_scenario("covid_march_2020")
+results = engine.run_scenario("2008_financial_crisis")
+results = engine.run_scenario("dot_com_bubble")
+
+# Custom scenario
+custom_shocks = {
+    "equity": -0.30,      # 30% equity drop
+    "credit_spread": 200,  # 200bps spread widening
+    "rates": -0.50,       # 50bps rate cut
+    "fx_usd": 0.10        # 10% USD appreciation
+}
+results = engine.run_custom_scenario(custom_shocks)
+```
+
+### 3. Counterparty Risk (`risk_engine/counterparty.py`)
+
+Exposure metrics for OTC derivatives:
+
+```python
+from risk_engine.counterparty import CounterpartyRisk
+
+cpty_risk = CounterpartyRisk(derivative_portfolio)
+
+# Potential Future Exposure
+pfe = cpty_risk.calculate_pfe(confidence=0.95, horizon=365)
+
+# Credit Valuation Adjustment
+cva = cpty_risk.calculate_cva(
+    counterparty_pd=0.02,  # 2% probability of default
+    lgd=0.60               # 60% loss given default
+)
+
+# Exposure at Default
+ead = cpty_risk.calculate_ead()
+```
+
+### 4. Portfolio Analytics (`risk_engine/analytics.py`)
+
+Concentration and correlation analysis:
+
+```python
+from risk_engine.analytics import PortfolioAnalytics
+
+analytics = PortfolioAnalytics(portfolio)
+
+# Sector concentration
+sector_exposure = analytics.sector_concentration()
+
+# Top N holdings
+top_holdings = analytics.top_holdings(n=10)
+
+# Correlation matrix
+corr_matrix = analytics.correlation_matrix()
+
+# Herfindahl-Hirschman Index (concentration)
+hhi = analytics.calculate_hhi()
+```
+
+---
+
+## 📈 Examples
+
+### Example 1: Daily Risk Report
+
+```python
+from risk_engine import RiskReport
+from datetime import date
+
+report = RiskReport(portfolio, as_of_date=date.today())
+
+# Generate comprehensive report
+report.add_var_summary()
+report.add_stress_tests()
+report.add_concentration_analysis()
+report.add_pnl_attribution()
+
+report.export_html("reports/daily_risk_report.html")
+report.export_pdf("reports/daily_risk_report.pdf")
+```
+
+### Example 2: Backtesting VaR Model
+
+```python
+from risk_engine.backtest import VaRBacktest
+
+backtest = VaRBacktest(
+    returns=historical_returns,
+    var_confidence=0.99,
+    lookback_window=250
+)
+
+results = backtest.run()
+
+print(f"VaR Breaches: {results['breaches']}")
+print(f"Breach Rate: {results['breach_rate']:.2%}")
+print(f"Kupiec Test p-value: {results['kupiec_pvalue']:.4f}")
+
+backtest.plot_breaches(save_path="reports/var_backtest.png")
+```
+
+### Example 3: Monte Carlo Simulation
+
+```python
+from risk_engine.simulation import MonteCarloSimulator
+
+simulator = MonteCarloSimulator(
+    portfolio=portfolio,
+    num_simulations=10000,
+    horizon_days=252  # 1 year
+)
+
+paths = simulator.simulate()
+
+# Analyze distribution of terminal values
+terminal_values = paths[:, -1]
+print(f"Expected Value: ${terminal_values.mean():,.2f}")
+print(f"5th Percentile: ${np.percentile(terminal_values, 5):,.2f}")
+print(f"95th Percentile: ${np.percentile(terminal_values, 95):,.2f}")
+
+simulator.plot_paths(num_paths=100)
+```
+
+---
+
+## 📐 Methodology
+
+### Value at Risk (VaR)
+
+**Historical VaR:**
+```
+VaR_α = -Percentile(returns, 1-α)
+```
+
+**Parametric VaR:**
+```
+VaR_α = μ - σ × Φ⁻¹(α) × √t
+```
+Where Φ⁻¹ is the inverse standard normal CDF.
+
+**Monte Carlo VaR:**
+```
+1. Estimate return distribution parameters
+2. Generate N simulated price paths
+3. Calculate portfolio value for each path
+4. VaR = percentile of simulated losses
+```
+
+### Credit Valuation Adjustment (CVA)
+
+```
+CVA = LGD × Σ EE(tᵢ) × PD(tᵢ₋₁, tᵢ) × DF(tᵢ)
+```
+
+Where:
+- `EE(t)` = Expected Exposure at time t
+- `PD(t₁,t₂)` = Probability of Default between t₁ and t₂
+- `DF(t)` = Discount Factor to time t
+- `LGD` = Loss Given Default
+
+---
+
+## 📁 Project Structure
+
+```
+hedge-fund-credit-risk/
+├── README.md
+├── LICENSE
+├── requirements.txt
+├── setup.py
+├── risk_engine/
+│   ├── __init__.py
+│   ├── var.py              # VaR calculations
+│   ├── scenarios.py        # Stress testing
+│   ├── counterparty.py     # Counterparty risk
+│   ├── analytics.py        # Portfolio analytics
+│   ├── simulation.py       # Monte Carlo
+│   ├── backtest.py         # Model validation
+│   └── report.py           # Report generation
+├── data_loader/
+│   ├── __init__.py
+│   ├── portfolio.py        # Portfolio loading
+│   └── market_data.py      # Market data fetching
+├── data/
+│   ├── sample_portfolio.csv
+│   └── scenarios/
+│       ├── 2008_crisis.json
+│       └── covid_2020.json
+├── tests/
+│   ├── test_var.py
+│   ├── test_scenarios.py
+│   └── test_counterparty.py
+├── notebooks/
+│   ├── 01_var_analysis.ipynb
+│   ├── 02_stress_testing.ipynb
+│   └── 03_cva_calculation.ipynb
+└── reports/
+    └── .gitkeep
+```
+
+---
+
+## 🧪 Testing
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate
-pip install pandas numpy matplotlib
+# Run all tests
+pytest tests/ -v
+
+# Run with coverage
+pytest tests/ --cov=risk_engine --cov-report=html
+
+# Run specific test module
+pytest tests/test_var.py -v
 ```
 
-3. Build the SQLite database and run the analysis:
+---
 
-```bash
-python scripts/create_database.py
-python scripts/analyze_risk.py
-```
+## 🗺 Roadmap
 
-Outputs will appear in the `results/` directory.
+- [x] Historical VaR
+- [x] Parametric VaR
+- [x] Monte Carlo VaR
+- [x] Scenario Analysis
+- [x] Basic Reporting
+- [ ] Expected Shortfall (ES/CVaR)
+- [ ] Incremental VaR
+- [ ] Component VaR
+- [ ] Real-time risk streaming
+- [ ] Integration with Bloomberg API
+- [ ] FRTB-compliant calculations
 
-## Future Extensions
+---
 
-* Incorporate additional assets (e.g., bonds, derivatives) and risk factors (momentum, volatility) to enrich the analysis.
-* Implement scenario analysis and stress testing, for example by shocking factor returns or simulating extreme market events.
-* Add a front‑end interface (e.g., Jupyter notebooks or dashboards) to interactively explore results and tailor risk assessments for individual counterparties.
+## 📚 References
 
-## License
+- Hull, J.C. (2018). *Risk Management and Financial Institutions*
+- Jorion, P. (2007). *Value at Risk: The New Benchmark for Managing Financial Risk*
+- Gregory, J. (2020). *The xVA Challenge: Counterparty Risk, Funding, Collateral, Capital and Initial Margin*
+- Basel Committee on Banking Supervision - [Minimum capital requirements for market risk](https://www.bis.org/bcbs/publ/d457.htm)
 
-This project is provided for educational purposes.  Data sources used herein originate from the public domain.
+---
+
+## 🤝 Contributing
+
+Contributions welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) for details.
+
+---
+
+## 👤 Author
+
+**Hatef Tabbakhian**  
+MSc Economics & Finance | Risk & Quantitative Analysis
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=flat&logo=linkedin)](https://linkedin.com/in/hateftaby)
+[![GitHub](https://img.shields.io/badge/GitHub-Follow-black?style=flat&logo=github)](https://github.com/Leotaby)
